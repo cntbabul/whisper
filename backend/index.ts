@@ -1,18 +1,17 @@
 import app from "./src/app.ts"
 import { connectDB } from "./src/config/database.ts";
-
-import { clerkMiddleware } from '@clerk/express'
-
-
-//middleware
-app.use(clerkMiddleware());
+import { createServer } from "http";
+import { initializeSocket } from "./src/utils/socket.ts";
 
 //port
 const PORT = process.env.PORT || 3000;
 
+const httpServer = createServer(app);
+initializeSocket(httpServer)
+
 //listen
 connectDB().then(() => {
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
         console.log(
             `✊ Node Server Running In ${process.env.DEV_MODE} Mode On Port ${PORT}`
         );

@@ -1,6 +1,7 @@
 import type { AuthRequest } from "../middleware/auth";
 import type { NextFunction, Response } from "express";
 import { Chat } from "../models/Chat.model";
+import { Types } from "mongoose";
 
 export async function getChats(req: AuthRequest, res: Response, next: NextFunction) {
     try {
@@ -32,8 +33,11 @@ export async function getOrCreateChat(req: AuthRequest, res: Response, next: Nex
     try {
         const userId = req.userId;
         const { participantId } = req.params;
-        if (!participantId) {
-            return res.status(400).json({ error: "participantId is required" });
+        if (!participantId || typeof participantId !== "string") {
+            return res.status(400).json({ error: "participantId must be a valid string" });
+        }
+        if (!Types.ObjectId.isValid(participantId)) {
+            return res.status(400).json({ error: "Invalid participantId" });
         }
 
         //check if chat exists
