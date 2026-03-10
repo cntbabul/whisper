@@ -1,11 +1,10 @@
 import { Router } from "express";
 import { protectRoute } from "../middleware/auth";
-import { getMessages } from "../controllers/messageController";
+import { getUsers } from "../controllers/userController";
 
 const router = Router();
 
-
-router.get("/chat/:chatId", protectRoute, getMessages)
+router.get("/", protectRoute, getUsers)
 
 
 

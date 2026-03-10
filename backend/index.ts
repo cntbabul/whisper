@@ -1,16 +1,11 @@
 import app from "./src/app.ts"
 import { connectDB } from "./src/config/database.ts";
 
+import { clerkMiddleware } from '@clerk/express'
 
 
-
-//routes
-// 1 test route
-// app.use("/api/v1/test", require("./routes/testRoutes"));
-
-
-
-
+//middleware
+app.use(clerkMiddleware());
 
 //port
 const PORT = process.env.PORT || 3000;
@@ -19,8 +14,10 @@ const PORT = process.env.PORT || 3000;
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log(
-            `✊ Node Server Running  In ${process.env.DEV_MODE} ModeOn Port ${process.env.PORT}`
-
+            `✊ Node Server Running In ${process.env.DEV_MODE} Mode On Port ${PORT}`
         );
     });
+}).catch((err) => {
+    console.log("Database connection failed", err);
+    process.exit(1);
 })
