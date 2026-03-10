@@ -3,7 +3,8 @@ import cors from "cors";
 import authRoutes from "./routes/authRoutes";
 import chatRoutes from "./routes/chatRoutes";
 import messageRoutes from "./routes/messageRoutes";
-import userRoutes from "./routes/userRoues";
+import userRoutes from "./routes/userRoutes";
+import { errorHandler } from "./middleware/errorHandler";
 
 const PORT = process.env.PORT || 3000
 
@@ -25,6 +26,9 @@ app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/chats", chatRoutes)
 app.use("/api/v1/messages", messageRoutes)
 app.use("/api/v1/users", userRoutes)
+
+//error handler in last
+app.use(errorHandler)
 
 
 
