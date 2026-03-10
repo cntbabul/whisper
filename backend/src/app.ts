@@ -6,6 +6,7 @@ import messageRoutes from "./routes/messageRoutes";
 import userRoutes from "./routes/userRoutes";
 import { errorHandler } from "./middleware/errorHandler";
 import { clerkMiddleware } from "@clerk/express";
+import path from "path";
 
 const PORT = process.env.PORT || 3000
 
@@ -32,6 +33,14 @@ app.use("/api/v1/users", userRoutes)
 
 //error handler in last
 app.use(errorHandler)
+
+
+///serve front end under backend
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../../web/dist")))
+    app.get("/{*any}", (_, res) => { res.sendFile(path.join(__dirname, "../../web/dist/index.html")) })
+}
+
 
 
 

@@ -5,9 +5,7 @@ import { Message } from "../models/Message.model";
 import { Chat } from "../models/Chat.model";
 import { User } from "../models/User.model"
 
-interface SocketWithUserId extends Socket {
-    userId?: string;
-}
+
 //store online users in memory userId,socketId
 export const onlineUsers: Map<string, string> = new Map();
 
@@ -39,7 +37,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
                 return next(new Error("User not found"))
             }
 
-            (socket as SocketWithUserId).userId = user._id.toString();
+            socket.data.userId = user._id.toString();
             next();
         } catch (error: any) {
             next(new Error(error))
@@ -47,8 +45,8 @@ export const initializeSocket = (httpServer: HttpServer) => {
 
     });
 
-    io.on("connection", (socket: SocketWithUserId) => {
-        const userId = socket.userId;
+    io.on("connection", (socket) => {
+        const userId = socket.data.userId;
 
         if (!userId) {
             console.log("No userId found(socket.ts)")
@@ -87,9 +85,9 @@ export const initializeSocket = (httpServer: HttpServer) => {
                 chat.lastMessageAt = new Date()
                 await chat.save();
 
-                await message.populate("sender", "name email avatar");
+                await message.populate("sender", "name avatar");
                 //emit to chat room (for users inside the chat)
-                io.to(`chat:${chatId}.emit("new-message",message)`);
+                io.to(`chat:${chatId}`).emit("new-message", message);
 
                 //also emit to participants personal rooms (for chat list view)
                 //todo:study socket.io
