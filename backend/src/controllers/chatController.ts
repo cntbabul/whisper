@@ -14,7 +14,7 @@ export async function getChats(req: AuthRequest, res: Response, next: NextFuncti
             const otherParticipant = chat.participants.find(p => p._id.toString() !== userId);
             return {
                 _id: chat._id,
-                participant: otherParticipant,
+                participant: otherParticipant || null,
                 lastMessage: chat.lastMessage,
                 lastMessageAt: chat.lastMessageAt,
                 createdAt: chat.createdAt,
@@ -32,6 +32,9 @@ export async function getOrCreateChat(req: AuthRequest, res: Response, next: Nex
     try {
         const userId = req.userId;
         const { participantId } = req.params;
+        if (!participantId) {
+            return res.status(400).json({ error: "participantId is required" });
+        }
 
         //check if chat exists
         let chat = await Chat.findOne({ participants: { $all: [userId, participantId] }, })
