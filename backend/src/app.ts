@@ -30,14 +30,23 @@ app.use("/api/v1/chats", chatRoutes)
 app.use("/api/v1/messages", messageRoutes)
 app.use("/api/v1/users", userRoutes)
 
+///serve front end under backend
+if (process.env.NODE_ENV === "production") {
+    const frontendPath = path.join(__dirname, "../../web/dist");
+    console.log("Serving frontend from: ", frontendPath);
+    app.use(express.static(frontendPath));
+    app.get(/.*/, (req, res, next) => {
+        res.sendFile(path.join(frontendPath, "index.html"), (err) => {
+            if (err) {
+                console.error("Error serving index.html:", err);
+                next(err);
+            }
+        }); 
+    });
+}
+
 //error handler in last
 app.use(errorHandler)
 
-///serve front end under backend
-if (process.env.NODE_ENV === "production") {
-    const frontendPath = path.join(process.cwd(), "../web/dist");
-    app.use(express.static(frontendPath));
-    app.get(/.*/, (_, res) => { res.sendFile(path.join(frontendPath, "index.html")); });
-}
 export default app;
 
