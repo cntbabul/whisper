@@ -36,7 +36,7 @@ app.use(errorHandler)
 ///serve front end under backend
 if (process.env.NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "../../web/dist")))
-    app.get("*", (_, res) => { res.sendFile(path.join(__dirname, "../../web/dist/index.html")) })
+    app.get(/.*/, (_, res) => { res.sendFile(path.join(__dirname, "../../web/dist/index.html")) })
 }
 export default app;
 
