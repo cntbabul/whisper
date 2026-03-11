@@ -11,7 +11,7 @@ initializeSocket(httpServer)
 
 //listen
 connectDB().then(() => {
-    httpServer.listen(PORT, () => {
+    httpServer.listen(PORT as number, "0.0.0.0", () => {
         console.log(
             `✊ Node Server Running In ${process.env.DEV_MODE} Mode On Port ${PORT}`
         );
