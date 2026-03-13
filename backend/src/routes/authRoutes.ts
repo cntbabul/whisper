@@ -6,7 +6,7 @@ const router = Router();
 
 
 router.get("/me", protectRoute, getMe)
-router.get("/calback", authCallback,)
+router.post("/callback", authCallback)
 
 
 
