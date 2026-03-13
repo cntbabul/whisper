@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuth } from "@clerk/expo";
 import { useEffect } from "react";
+import * as Sentry from '@sentry/react-native';
 
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -22,9 +23,28 @@ export const useApi = () => {
             }
             return config;
         });
+        const responseInterceptor = api.interceptors.response.use((response) => response, (error) => {
+            if (error.response) {
+                Sentry.logger.error(
+                    Sentry.logger.fmt`API request failed - no response`, {
+                    status: error.response.status,
+                    endpoint: error.config?.url,
+                    method: error.config?.method
+                })
+            } else if (error.request) {
+                Sentry.logger.warn("API request failed - no response", {
+                    endpoint: error.config?.url,
+                    method: error.config?.method,
+                })
+            }
+            return Promise.reject(error)
+
+        })
         //cleanup function
         return () => {
             api.interceptors.request.eject(requestInterceptor);
+            api.interceptors.request.eject(responseInterceptor);
+
         };
     }, [getToken]);
     return api;

@@ -1,19 +1,15 @@
 import React from 'react'
 import { Redirect, Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@clerk/expo';
 
-
-
 const TabsLayout = () => {
-    const insets = useSafeAreaInsets();
     const { isSignedIn, isLoaded } = useAuth()
     if (!isLoaded) return null
     if (!isSignedIn) return <Redirect href="/(auth)" />
     return (
-        <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom, backgroundColor: "#0d0d0f" }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#0d0d0f" }}>
             <Tabs
                 screenOptions={{
                     headerShown: false,
@@ -44,7 +40,7 @@ const TabsLayout = () => {
                         )
                     }} />
             </Tabs>
-        </View>
+        </SafeAreaView>
     )
 }
 

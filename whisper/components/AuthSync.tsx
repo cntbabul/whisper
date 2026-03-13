@@ -9,7 +9,7 @@ const AuthSync = () => {
     const hasSynced = useRef(false);
 
     useEffect(() => {
-        if (isSignedIn && user && !hasSynced.current) {
+        if (isSignedIn && user && !hasSynced.current && !user.publicMetadata?.isSynced) {
             hasSynced.current = true;
 
             syncUser(undefined, {

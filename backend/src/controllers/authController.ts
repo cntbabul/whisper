@@ -42,6 +42,14 @@ export async function authCallback(req: Request, res: Response, next: NextFuncti
                 avatar: clerkUser.imageUrl
             })
         }
+
+        // Mark as synced in Clerk so the frontend stops calling this
+        await clerkClient.users.updateUser(clerkId, {
+            publicMetadata: {
+                isSynced: true
+            }
+        })
+
         res.json(user)
     } catch (error) {
         res.status(500)
