@@ -3,7 +3,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 import { ClerkProvider } from '@clerk/expo'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { tokenCache } from "@clerk/clerk-expo/token-cache";
+import { tokenCache } from "@clerk/expo/token-cache";
 import AuthSync from "@/components/AuthSync";
 import { StatusBar } from "react-native";
 import * as Sentry from '@sentry/react-native';
