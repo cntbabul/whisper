@@ -1,6 +1,7 @@
 import { useSSO } from "@clerk/expo";
 import { useState } from "react";
 import { Alert } from "react-native";
+import * as Linking from 'expo-linking'
 
 function useAuthSocial() {
     const [loadingStrategy, setLoadingStrategy] = useState<string | null>(null);
@@ -12,7 +13,10 @@ function useAuthSocial() {
 
 
         try {
-            const { createdSessionId, setActive } = await startSSOFlow({ strategy });
+            const { createdSessionId, setActive } = await startSSOFlow({ 
+                strategy,
+                redirectUrl: Linking.createURL('/(tab)', { scheme: 'mobile' })
+            });
             if (!createdSessionId || !setActive) {
                 const provider = strategy === 'oauth_google' ? "Google" : "Apple";
                 Alert.alert("Sign-in incomplete", `Failed to sign in with ${provider}`)

@@ -1,0 +1,4 @@
+$ bun --watch index.ts
+❌ Mongodb Database Error  MongoNetworkError: Cannot destructure property 'subject' from null or undefined value
+error: script "dev" exited with code 1
+as terminated by signal SIGKILL (Forced quit)

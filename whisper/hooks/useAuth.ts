@@ -1,12 +1,13 @@
 import { useApi } from "@/lib/axios";
+import { User } from "@/types";
 import { useMutation } from "@tanstack/react-query";
 
 export const useAuthCallBack = () => {
-    const api = useApi();
+    const { apiWithAuth } = useApi();
 
     return useMutation({
         mutationFn: async () => {
-            const { data } = await api.post("api/v1/auth/callback")
+            const { data } = await apiWithAuth<User>({ method: "POST", url: "/auth/callback" })
             return data
         }
     })

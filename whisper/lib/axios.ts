@@ -1,51 +1,50 @@
 import axios from "axios";
+import * as Sentry from "@sentry/react-native";
 import { useAuth } from "@clerk/expo";
-import { useEffect } from "react";
-import * as Sentry from '@sentry/react-native';
-
+import { useCallback } from "react";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
+// this is the same thing we did with useEffect setup but it's optimized version - it's better!!
+
 const api = axios.create({
-    baseURL: API_URL?.endsWith("/") ? API_URL : `${API_URL}/`,
-    headers: {
-        "Content-Type": "application/json",
-    },
+    baseURL: API_URL,
+    headers: { "Content-Type": "application/json" },
 });
+
+// Response interceptor registered once
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response) {
+            Sentry.logger.error(
+                Sentry.logger
+                    .fmt`API request failed: ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
+                { status: error.response.status, endpoint: error.config?.url, method: error.config?.method }
+            );
+        } else if (error.request) {
+            Sentry.logger.warn("API request failed - no response", {
+                endpoint: error.config?.url,
+                method: error.config?.method,
+            });
+        }
+        return Promise.reject(error);
+    }
+);
 
 export const useApi = () => {
     const { getToken } = useAuth();
-    useEffect(() => {
-        const requestInterceptor = api.interceptors.request.use(async (config) => {
+
+    const apiWithAuth = useCallback(
+        async <T>(config: Parameters<typeof api.request>[0]) => {
             const token = await getToken();
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-            return config;
-        });
-        const responseInterceptor = api.interceptors.response.use((response) => response, (error) => {
-            if (error.response) {
-                Sentry.logger.error(
-                    Sentry.logger.fmt`API request failed - no response`, {
-                    status: error.response.status,
-                    endpoint: error.config?.url,
-                    method: error.config?.method
-                })
-            } else if (error.request) {
-                Sentry.logger.warn("API request failed - no response", {
-                    endpoint: error.config?.url,
-                    method: error.config?.method,
-                })
-            }
-            return Promise.reject(error)
+            return api.request<T>({
+                ...config,
+                headers: { ...config.headers, ...(token && { Authorization: `Bearer ${token}` }) },
+            });
+        },
+        [getToken]
+    );
 
-        })
-        //cleanup function
-        return () => {
-            api.interceptors.request.eject(requestInterceptor);
-            api.interceptors.request.eject(responseInterceptor);
-
-        };
-    }, [getToken]);
-    return api;
-}
+    return { api, apiWithAuth };
+};
