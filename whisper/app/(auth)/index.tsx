@@ -1,23 +1,22 @@
-import { View, Text, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ActivityIndicator, Dimensions } from 'react-native'
 import React from 'react'
 import logo from '@/assets/images/logo.png'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
-import { Dimensions } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import useAuthSocial from '@/hooks/useSocialAuth'
+import AnimatedBackground from '@/components/AnimatedBackground'
 
 const { width, height } = Dimensions.get('window')
 
 const AuthScreen = () => {
-    const insets = useSafeAreaInsets()
     const { handleSocialAuth, loadingStrategy } = useAuthSocial()
     const isLoading = loadingStrategy !== null
 
     return (
         <View className='flex-1 bg-surface-dark'>
-            <View className='absolute inset-0 overflow-hidden'>
-                {/* todo      */}
+            <View className='absolute inset-0 overflow-hidden bg-surface-dark'>
+                <AnimatedBackground />
             </View>
             <SafeAreaView className='flex-1'>
                 <View className='items-center pt-7'>
@@ -36,7 +35,7 @@ const AuthScreen = () => {
                         contentFit='contain'
                     />
                     <View className='mt-6 items-center'>
-                        <Text className='text-5xl font-bold text-forground font-sans'>
+                        <Text className='text-5xl font-bold text-foreground font-sans'>
                             Connect & Chat
                         </Text>
                         <Text className='text-3xl font-bold text-primary-default font-mono'>
@@ -71,7 +70,7 @@ const AuthScreen = () => {
                             accessibilityLabel='Sign in with Apple'
                             onPress={() => !isLoading && handleSocialAuth("oauth_apple")}
                         >
-                            {loadingStrategy === "oauth_apple" ? <ActivityIndicator color="#0000" /> : (
+                            {loadingStrategy === "oauth_apple" ? <ActivityIndicator color="#000" /> : (
                                 <><Ionicons name='logo-apple' size={20} color="#000" />
                                     <Text className='text-lg font-bold text-surface-dark'>
                                         Apple
