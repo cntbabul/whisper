@@ -1,6 +1,5 @@
 import { Text, View, FlatList, TouchableOpacity } from 'react-native'
 import React from 'react'
-import * as Sentry from '@sentry/react-native'
 import { useRouter } from 'expo-router';
 import { useChats } from '@/hooks/useChats';
 import { ChatTabLoading } from '@/components/ChatSkeleton';
@@ -8,10 +7,12 @@ import Header from '@/components/Header';
 import ChatItem from '@/components/ChatItem';
 import type { Chat } from '@/types';
 import EmptyUI from '@/components/EmptyUI';
+import { useSocketStore } from '@/lib/socket';
 
 const ChatsTab = () => {
     const router = useRouter();
     const { data: chats, isLoading, error, refetch } = useChats();
+    const { onlineUsers, typingUsers, unreadChats } = useSocketStore();
 
     if (isLoading) {
         return <ChatTabLoading />;
@@ -51,6 +52,7 @@ const ChatsTab = () => {
             <FlatList
                 data={chats}
                 keyExtractor={(item) => item._id}
+                extraData={{ onlineUsers, typingUsers, unreadChats }}
                 renderItem={({ item }) => (
                     <ChatItem
                         chat={item}
