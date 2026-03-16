@@ -52,13 +52,13 @@ export const initializeSocket = (httpServer: HttpServer) => {
             console.log("No userId found(socket.ts)")
             return;
         }
-        //send list of currently online users to the newly connected client
-        socket.emit("online-users", { userIds: Array.from(onlineUsers.keys()) });
-
-        //store user in the onlineUsers map
+        // Store user in the onlineUsers map FIRST
         onlineUsers.set(userId, socket.id);
 
-        //notify others that this current user is online
+        // Send list of currently online users to the newly connected client (now includes self)
+        socket.emit("online-users", { userIds: Array.from(onlineUsers.keys()) });
+
+        // Notify others that this current user is online
         socket.broadcast.emit("user-online", { userId });
 
         socket.join(`user:${userId}`);
@@ -68,7 +68,7 @@ export const initializeSocket = (httpServer: HttpServer) => {
             socket.leave(`chat:${chatId}`)
         })
         //handle sending mesage 
-        socket.on("seng-message", async (data: { chatId: string, text: string }) => {
+        socket.on("send-message", async (data: { chatId: string, text: string }) => {
             try {
                 const { chatId, text } = data;
                 const chat = await Chat.findOne({ _id: chatId, participants: userId })
@@ -86,13 +86,17 @@ export const initializeSocket = (httpServer: HttpServer) => {
                 await chat.save();
 
                 await message.populate("sender", "name avatar");
-                //emit to chat room (for users inside the chat)
+                // Emit to chat room (for users currently viewing the chat)
                 io.to(`chat:${chatId}`).emit("new-message", message);
 
-                //also emit to participants personal rooms (for chat list view)
-                //todo:study socket.io
+                // Also emit to participants' personal rooms EXCEPT the sender 
+                // (for chat list preview update)
+                // The sender already has the message in their UI (optimistic or via chat room)
                 for (const participantId of chat.participants) {
-                    io.to(`user:${participantId}`).emit("new-message", message);
+                    const pId = participantId.toString();
+                    if (pId !== userId) {
+                        io.to(`user:${pId}`).emit("new-message", message);
+                    }
                 }
             } catch (error) {
                 console.log("Error in send-message:", error);
@@ -100,8 +104,27 @@ export const initializeSocket = (httpServer: HttpServer) => {
             }
         })
 
-        socket.on("typing", async (data: any) => { })
-        socket.on("disconnet", () => {
+        socket.on("typing", async (data: { chatId: string; isTyping: boolean }) => {
+            const typingPayload = {
+                userId,
+                chatId: data.chatId,
+                isTyping: data.isTyping
+            }
+            //emit to chat room (for users inside the chat)
+            socket.to(`chat:${data.chatId}`).emit("typing", typingPayload);
+            try {
+                const chat = await Chat.findById(data.chatId);
+                if (chat) {
+                    const otherParticipantId = chat.participants.find((p: any) => p.toString() !== userId);
+                    if (otherParticipantId) {
+                        socket.to(`user:${otherParticipantId}`).emit("typing", typingPayload);
+                    }
+                }
+            } catch (error) {
+                //silently fail
+            }
+        })
+        socket.on("disconnect", () => {
             onlineUsers.delete(userId);
             socket.broadcast.emit("user-offline", { userId });
             console.log("User disconnected:", userId);

@@ -12,7 +12,6 @@ import { User } from '@/types';
 import UserItem from '@/components/UserItem';
 
 const NewChatScreen = () => {
-    const isOnline = true
     const router = useRouter();
     const { data: allUsers, isLoading } = useUsers();
     const { mutate: getOrCreateChat, isPending: isCreatingChat } = useGetOrCreateChat()
@@ -135,7 +134,6 @@ const NewChatScreen = () => {
                                 renderItem={({ item: user }) => (
                                     <UserItem
                                         user={user}
-                                        isOnline={isOnline}
                                         onPress={() => handleUserSelect(user)}
                                         disabled={isCreatingChat}
                                     />

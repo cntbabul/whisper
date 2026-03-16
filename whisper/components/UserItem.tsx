@@ -2,15 +2,16 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Image } from 'expo-image';
 import { User } from '@/types';
+import { useSocketStore } from '@/lib/socket';
 
 interface UserItemProps {
     user: User;
-    isOnline?: boolean;
     onPress: () => void;
     disabled?: boolean;
 }
 
-const UserItem: React.FC<UserItemProps> = ({ user, isOnline, onPress, disabled }) => {
+const UserItem: React.FC<UserItemProps> = ({ user, onPress, disabled }) => {
+    const isOnline = useSocketStore((state) => state.onlineUsers.has(user._id));
     return (
         <View>
             <TouchableOpacity
