@@ -1,5 +1,5 @@
-import { Text, View, FlatList, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { Text, View, FlatList, TouchableOpacity, RefreshControl } from 'react-native'
+import React, { useCallback, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { useChats } from '@/hooks/useChats';
 import { ChatTabLoading } from '@/components/ChatSkeleton';
@@ -12,7 +12,14 @@ import { useSocketStore } from '@/lib/socket';
 const ChatsTab = () => {
     const router = useRouter();
     const { data: chats, isLoading, error, refetch } = useChats();
-    const { onlineUsers, typingUsers, unreadChats } = useSocketStore();
+    const { onlineUsers, typingUsers, unreadChats, isConnected } = useSocketStore();
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
 
     if (isLoading) {
         return <ChatTabLoading />;
@@ -60,16 +67,34 @@ const ChatsTab = () => {
                     />
                 )}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 100 }}
+                contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
                 ListHeaderComponent={<Header />}
                 ListEmptyComponent={<EmptyUI
                     title="No chats yet"
                     subtitle="Start a new conversation !"
                     buttonLabel="New Chat"
                     onPressButton={() => router.push("/new-chat")}
-
                 />}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor="#F4A261"
+                        colors={["#F4A261"]}
+                        progressBackgroundColor="#1a1a1d"
+                    />
+                }
+                ItemSeparatorComponent={() => (
+                    <View className="h-px bg-surface-light/15 ml-[70px]" />
+                )}
             />
+
+            {/* Connection status bar */}
+            {!isConnected && (
+                <View className="absolute bottom-24 left-4 right-4 bg-red-500/90 rounded-full px-4 py-2 items-center">
+                    <Text className="text-white text-xs font-medium">No connection — messages may be delayed</Text>
+                </View>
+            )}
         </View>
     )
 }
