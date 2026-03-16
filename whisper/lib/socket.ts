@@ -52,7 +52,11 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         }
 
         // Resolve URL dynamically
-        if (Platform.OS === 'android') {
+        if (process.env.EXPO_PUBLIC_API_URL) {
+            // Strip the /api/v1 or similar path suffix for socket connection
+            // since socket.io usually lives at the root or has its own path handling
+            SOCKET_URL = process.env.EXPO_PUBLIC_API_URL.replace(/\/api\/v1\/?$/, '');
+        } else if (Platform.OS === 'android') {
             const debuggerHost = Constants.expoConfig?.hostUri;
             if (debuggerHost) {
                 const host = debuggerHost.split(':')[0];
@@ -63,6 +67,8 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         } else {
             SOCKET_URL = "http://localhost:3000";
         }
+
+        console.log("🔌 Connecting to socket:", SOCKET_URL);
 
         set({ isConnecting: true, lastToken: token });
         const socket = io(SOCKET_URL, { 
@@ -173,7 +179,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         socket.on("socket-error", (error: { message: string }) => {
             console.log("🔴 Socket error:", error.message);
             Sentry.logger.error("🔴 Socket error:", { message: error.message });
-            set({ isConnected: false, socket: null });
+            // Don't disconnect — socket-error is a message-level error, not a connection-level one
         });
 
         set({ queryClient });

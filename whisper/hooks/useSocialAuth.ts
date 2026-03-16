@@ -20,22 +20,19 @@ function useAuthSocial() {
             if (!createdSessionId || !setActive) {
                 const provider = strategy === 'oauth_google' ? "Google" : "Apple";
                 Alert.alert("Sign-in incomplete", `Failed to sign in with ${provider}`)
+                setLoadingStrategy(null);
                 return;
             }
             await setActive({ session: createdSessionId })
+            setLoadingStrategy(null);
 
         } catch (error) {
             console.log("Error in social auth", error)
+            setLoadingStrategy(null);
             const provider = strategy === "oauth_google" ? "Google" : "Apple"
             Alert.alert(
                 "Error",
-                `Failed to sign in with ${provider}`,
-                [
-                    {
-                        text: "OK",
-                        onPress: () => setLoadingStrategy(null),
-                    },
-                ]
+                `Failed to sign in with ${provider}`
             )
         }
     }

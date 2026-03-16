@@ -1,5 +1,4 @@
 import { useAuthCallBack } from "@/hooks/useAuth";
-import { useSocketStore } from "@/lib/socket";
 import { useAuth, useUser } from "@clerk/expo";
 import { useEffect, useRef } from "react";
 
@@ -8,8 +7,6 @@ const AuthSync = () => {
     const { user } = useUser();
     const { mutate: syncUser } = useAuthCallBack();
     const hasSynced = useRef(false);
-
-    const { username } = useSocketStore();
 
     useEffect(() => {
         if (isSignedIn && user && !hasSynced.current && !user.publicMetadata?.isSynced) {

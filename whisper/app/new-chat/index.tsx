@@ -16,7 +16,7 @@ const NewChatScreen = () => {
     const { data: allUsers, isLoading } = useUsers();
     const { mutate: getOrCreateChat, isPending: isCreatingChat } = useGetOrCreateChat()
     const [searchQuery, setSearchQuery] = useState('');
-    const [creatingChat, setCreatingChat] = useState<string | null>(null);
+    //todo:const [creatingChat, setCreatingChat] = useState<string | null>(null);
 
     // Group users by first letter
     const users = allUsers?.filter((u) => {

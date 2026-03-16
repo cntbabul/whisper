@@ -13,9 +13,9 @@ import SocketConnection from "@/components/SocketConnection";
 Sentry.init({
   dsn: 'https://798d4293072d4d83a0186793a8725459@o4511035269513216.ingest.us.sentry.io/4511035547516928',
 
-  // Adds more context data to events (IP address, cookies, user, etc.)
-  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
-  sendDefaultPii: true,
+  // Controls collection of PII (Personable Identifiable Information) like IP addresses.
+  // Defaults to false for privacy compliance. Opt-in via EXPO_PUBLIC_SENTRY_SEND_DEFAULT_PII='true' environment variable.
+  sendDefaultPii: process.env.EXPO_PUBLIC_SENTRY_SEND_DEFAULT_PII === 'true',
 
   // Enable Logs
   enableLogs: true,
@@ -23,7 +23,8 @@ Sentry.init({
   // Configure Session Replay
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration()],
+  integrations: [
+    Sentry.mobileReplayIntegration({ maskAllImages: false, maskAllText: false, })],
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
